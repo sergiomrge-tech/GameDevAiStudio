@@ -10,7 +10,7 @@ Apenas a **configuração inicial** exige abrir o GitHub para criar um Fine-grai
 
 O pipeline [Android APK](.github/workflows/android.yml) compila, testa, verifica lint e gera uma prévia APK no GitHub Releases após aprovação da branch principal. Consulte o [guia Android](android/README.md) para instalar, conectar e fazer seu primeiro teste.
 
-**Estado real:** a automação de Issues já classifica o especialista, mas só produz planejamento com IA se OPENAI_API_KEY/OPENAI_MODEL estiverem configurados; ainda não modifica automaticamente projetos Godot/Unity nem gera APK de jogos.
+**Estado real:** a automação de Issues já classifica o especialista, mas só produz planejamento com IA se OPENAI_API_KEY estiver configurada; ainda não modifica automaticamente projetos Godot/Unity nem gera APK de jogos.
 
 ## O que funciona
 
@@ -18,7 +18,7 @@ O pipeline [Android APK](.github/workflows/android.yml) compila, testa, verifica
 - Cadastro de projetos GitHub e associação opcional a checkout Git local.
 - Persistência SQLite de projetos, tarefas, estado, planos e logs.
 - Encaminhamento de tarefas para seis perfis: direção, programação, arte, gameplay, QA e builds.
-- Planejamento real via OpenAI Responses API, apenas quando OPENAI_API_KEY e OPENAI_MODEL estão configurados.
+- Planejamento real via OpenAI Responses API, apenas quando OPENAI_API_KEY está configurada.
 - Execução opcional com Codex CLI em repositório local limpo, criando branch por tarefa; sem commit/push/merge automáticos.
 - Adaptador para checagem Godot headless em runner que tenha o executável instalado.
 - Testes Python, HTTP API e workflow GitHub Actions.
@@ -32,13 +32,22 @@ O pipeline [Android APK](.github/workflows/android.yml) compila, testa, verifica
 
 No mesmo computador/servidor, abra http://127.0.0.1:8765.
 
-Para usar planejamento por IA, configure OPENAI_API_KEY e OPENAI_MODEL no ambiente do processo. A assinatura do ChatGPT não fornece automaticamente créditos de API.
+Para usar planejamento por IA, configure OPENAI_API_KEY no ambiente do processo (modelo padrão: gpt-5-mini). A assinatura do ChatGPT não fornece automaticamente créditos de API.
+
+## Ativação da IA para o aplicativo Android (uma configuração)
+1. Crie uma chave de **API** em https://platform.openai.com/api-keys, no projeto OpenAI com billing/cota disponíveis. O ChatGPT Plus não cobre custos de API.
+2. No repositório, abra Settings > Secrets and variables > Actions > Secrets > New repository secret.
+3. Nome: `OPENAI_API_KEY`. Valor: cole a chave **somente no GitHub**, nunca em Issues, no APK ou no chat.
+4. O modelo já vem configurado como `gpt-5-mini`. Para trocar, crie a variável `OPENAI_MODEL` em Settings > Secrets and variables > Actions > Variables.
+5. Para processar novamente uma tarefa antiga que exiba "Planejamento IA pendente", feche e **reabra a Issue** no GitHub. Não crie outra tarefa. Atualize os comentários no aplicativo.
+
+A automação publica o plano como comentário na própria tarefa. Falhas HTTP da API aparecem com diagnóstico sem revelar a chave. A automação **não implementa código**: apenas produz planejamento por IA. A chave fica armazenada como GitHub Actions Secret, não no aplicativo.
 
 ## Enviar tarefas diretamente do celular via GitHub Issues
 
 Sem precisar de servidor ligado: abra a aba Issues do repositório, toque em New issue e escolha o formulário Tarefa de jogo (título começando por [JOGO]). O GitHub Actions identifica o especialista e responde em comentário. O workflow aceita apenas Issues abertas pelo proprietário. Fechar e reabrir a Issue permite novo processamento depois de configurar a IA.
 
-Para planejamento real por IA, configure Settings > Secrets and variables > Actions > Secrets: OPENAI_API_KEY; em Variables: OPENAI_MODEL (um modelo permitido na sua conta). Sem configuração há somente triagem, não um plano inventado. A API é cobrada separadamente do ChatGPT Plus.
+Para planejamento real por IA, configure Settings > Secrets and variables > Actions > Secrets: OPENAI_API_KEY; opcionalmente em Variables: OPENAI_MODEL (padrão: gpt-5-mini). Sem configuração há somente triagem, não um plano inventado. A API é cobrada separadamente do ChatGPT Plus.
 
 O conteúdo das Issues deste repositório público também é público. Nunca publique segredos. Esta automação não edita código, executa Godot ou gera APK.
 
