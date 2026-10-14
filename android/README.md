@@ -25,9 +25,16 @@ Este projeto **é um app Android nativo** (Java, Android SDK; sem WebView e sem 
 5. Abra **Solicitar**, informe jogo, engine, título e pedido.
 6. Abra **Tarefas**, escolha a tarefa e use **Verificar novas respostas**.
 
-O projeto deve permitir o acesso à criação de Issues. O workflow `.github/workflows/issue-plan.yml` precisa estar ativo no GitHub. Se OPENAI_API_KEY e OPENAI_MODEL não estiverem configurados no repositório, a resposta automática fará apenas a triagem determinística — isso é esperado, não uma falha.
+O projeto deve permitir o acesso à criação de Issues. O workflow `.github/workflows/issue-plan.yml` precisa estar ativo no GitHub. Se OPENAI_API_KEY não estiver configurada no repositório, a resposta automática fará apenas a triagem determinística — isso é esperado, não uma falha.
 
 **Privacidade**: Este repositório é público; Issues e comentários também são públicos. Não coloque segredos, dados pessoais sensíveis ou propriedade intelectual privada no texto das tarefas.
+
+## Ativar planejamento por IA
+A chave da API OpenAI **não é a credencial GitHub do aplicativo**.
+Crie a chave no painel OpenAI (https://platform.openai.com/api-keys) e cadastre-a no GitHub como Secret de repositório `OPENAI_API_KEY` em Settings > Secrets and variables > Actions.
+O workflow usa `gpt-5-mini` por padrão; o modelo pode ser substituído com a variável opcional `OPENAI_MODEL`.
+Sem créditos, permissão de modelo ou chave válida, haverá resposta de erro da IA na tarefa, mas as funções básicas do aplicativo continuam funcionando.
+Para reprocessar uma Issue anterior, feche e reabra a tarefa no GitHub uma única vez.
 
 ## Build na nuvem
 

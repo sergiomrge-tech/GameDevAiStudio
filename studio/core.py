@@ -145,9 +145,9 @@ class Studio:
     def plan_task(self, task_id):
         task=self.task(task_id)
         key=os.getenv("OPENAI_API_KEY")
-        model=os.getenv("OPENAI_MODEL")
-        if not key or not model:
-            raise RuntimeError("Planejamento com IA requer OPENAI_API_KEY e OPENAI_MODEL no servidor")
+        model=os.getenv("OPENAI_MODEL") or "gpt-5-mini"
+        if not key:
+            raise RuntimeError("Planejamento com IA requer OPENAI_API_KEY no servidor")
         payload=json.dumps({
             "model":model, "store":False,
             "instructions":"Elabore um plano curto e executável de desenvolvimento de jogos em português. Não declare implementação concluída.",

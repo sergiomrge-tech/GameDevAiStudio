@@ -44,7 +44,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.authorized():
             return self.reply(401,{"error":"Token inválido"})
         if path=="/api/health":
-            return self.reply(200,{"ok":True,"version":"0.1.0","ai_ready":bool(os.getenv("OPENAI_API_KEY") and os.getenv("OPENAI_MODEL")),
+            return self.reply(200,{"ok":True,"version":"0.1.0","ai_ready":bool(os.getenv("OPENAI_API_KEY")),
                 "executor_ready":os.getenv("ENABLE_CODEX_EXEC")=="1"})
         if path=="/api/agents":
             return self.reply(200,[{k:v for k,v in a.items() if k!="keywords"} for a in AGENTS])
