@@ -28,7 +28,7 @@ def now():
 
 def choose_agent(text):
     content = text.casefold()
-    scores = [(sum(word in content for word in a["keywords"]), a["id"]) for a in AGENTS[1:]]
+    scores = [(sum((4 if word in {"apk","compilar","build","exportar"} else 1) for word in a["keywords"] if word in content), a["id"]) for a in AGENTS[1:]]
     winner = max(scores, default=(0,"director"), key=lambda s:s[0])
     return winner[1] if winner[0] else "director"
 
