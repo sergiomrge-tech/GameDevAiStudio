@@ -24,6 +24,14 @@ No mesmo computador/servidor, abra http://127.0.0.1:8765.
 
 Para usar planejamento por IA, configure OPENAI_API_KEY e OPENAI_MODEL no ambiente do processo. A assinatura do ChatGPT não fornece automaticamente créditos de API.
 
+## Enviar tarefas diretamente do celular via GitHub Issues
+
+Sem precisar de servidor ligado: abra a aba Issues do repositório, toque em New issue e escolha o formulário Tarefa de jogo (título começando por [JOGO]). O GitHub Actions identifica o especialista e responde em comentário. O workflow aceita apenas Issues abertas pelo proprietário. Fechar e reabrir a Issue permite novo processamento depois de configurar a IA.
+
+Para planejamento real por IA, configure Settings > Secrets and variables > Actions > Secrets: OPENAI_API_KEY; em Variables: OPENAI_MODEL (um modelo permitido na sua conta). Sem configuração há somente triagem, não um plano inventado. A API é cobrada separadamente do ChatGPT Plus.
+
+O conteúdo das Issues deste repositório público também é público. Nunca publique segredos. Esta automação não edita código, executa Godot ou gera APK.
+
 ## Acesso no Android
 
 O painel **não fica disponível publicamente só porque o repositório está no GitHub**. É necessário hospedar o processo Python em um computador/servidor ligado. Para acesso remoto, use reverse proxy HTTPS, autenticação e configure STUDIO_HOST=0.0.0.0, STUDIO_TOKEN com valor forte. A interface recebe o token e o guarda apenas na sessão do navegador. Não exponha o servidor sem HTTPS e controles de acesso adicionais.

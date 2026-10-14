@@ -1,0 +1,45 @@
+name: Tarefa de jogo
+description: Encaminhe pelo celular uma tarefa para o GameDev AI Studio
+title: "[JOGO] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Triagem automática para Issues abertas pelo proprietário.
+        Planejamento com IA exige configuração da API. Não inclua segredos.
+  - type: input
+    id: project
+    attributes:
+      label: Jogo e repositório
+      placeholder: Dungeons Fire
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Engine
+      options:
+        - Godot
+        - Unity
+        - Unreal Engine
+        - Blender
+        - Outra
+    validations:
+      required: true
+  - type: textarea
+    id: requirement
+    attributes:
+      label: O que deve ser feito?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aprovação
+  - type: checkboxes
+    id: acknowledgment
+    attributes:
+      label: Confirmação
+      options:
+        - label: Entendo que a tarefa é classificada/planejada, não implementada automaticamente.
+          required: true

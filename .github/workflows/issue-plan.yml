@@ -1,0 +1,26 @@
+name: AI Issue Planner
+on:
+  issues:
+    types: [opened, reopened]
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: studio-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  triage:
+    if: github.event.issue.user.login == github.repository_owner && startsWith(github.event.issue.title, '[JOGO]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Classify and optionally plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+        run: python -m studio.github_issue
