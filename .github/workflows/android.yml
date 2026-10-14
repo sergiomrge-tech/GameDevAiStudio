@@ -1,7 +1,10 @@
 name: Android APK
 on:
   push:
-    branches: [main, feature/android-client-v0.2]
+    branches: [main, feature/android-client-v0.2, fix/android-api-diagnostics-v021]
+    paths: ['android/**', '.github/workflows/android.yml']
+  pull_request:
+    branches: [main]
     paths: ['android/**', '.github/workflows/android.yml']
   workflow_dispatch:
 permissions:
@@ -39,9 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk gamedev-ai-studio-v0.2-preview.apk
-          if gh release view v0.2.0-preview > /dev/null 2>&1; then
-            gh release upload v0.2.0-preview gamedev-ai-studio-v0.2-preview.apk --clobber
+          cp android/app/build/outputs/apk/debug/app-debug.apk gamedev-ai-studio-v0.2.1-preview.apk
+          if gh release view v0.2.1-preview > /dev/null 2>&1; then
+            gh release upload v0.2.1-preview gamedev-ai-studio-v0.2.1-preview.apk --clobber
           else
-            gh release create v0.2.0-preview gamedev-ai-studio-v0.2-preview.apk --target "$GITHUB_SHA" --title "GameDev AI Studio Android v0.2 - Previa" --notes "APK de testes assinado com chave debug temporaria. Integração Android/GitHub Issues. Nao executa jogos autonomamente." --prerelease
+            gh release create v0.2.1-preview gamedev-ai-studio-v0.2.1-preview.apk --target "$GITHUB_SHA" --title "GameDev AI Studio Android v0.2.1 - Previa" --notes "APK de testes assinado com chave debug temporaria. Integração Android/GitHub Issues. Nao executa jogos autonomamente." --prerelease
           fi
