@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020"><title>GameDev AI Studio</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#0b1020;color:#f0f4ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 85% 0%,#22335a 0,transparent 38%),#0b1020}
+header{border-bottom:1px solid #2a395a;background:#0d1528d9;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.shell{max-width:1200px;margin:auto;padding:20px}header .shell{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.5px}.logo{width:39px;height:39px;display:grid;place-items:center;background:#455df2;border-radius:12px;font-size:21px}
+.muted{color:#9caccd}small{font-size:12px}.status{font-size:12px;background:#26304d;padding:8px 12px;border-radius:20px}
+h1{font-size:clamp(27px,5vw,40px);margin:14px 0 8px;letter-spacing:-1px}h2{font-size:18px;margin:0 0 16px}
+p{line-height:1.5}.lead{color:#a7b7d9;margin:0 0 25px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:#131d32db;border:1px solid #293855;border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 15px 30px #02081723}
+.inline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.badge{display:inline-block;background:#273960;color:#bdd1ff;border-radius:25px;padding:4px 9px;font-size:11px}
+button,input,textarea,select{font:inherit}button{background:#4a65ec;border:0;color:#fff;border-radius:10px;padding:10px 14px;font-weight:650;cursor:pointer}button.secondary{background:#283859}button:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{width:100%;background:#0d172b;border:1px solid #334361;border-radius:10px;color:#edf2ff;padding:12px;outline:none}textarea{min-height:80px;resize:vertical}
+label{display:block;color:#aebdde;font-size:12px;margin-bottom:7px}.form{display:grid;gap:10px;margin-top:15px}
+.item{padding:14px 0;border-bottom:1px solid #293650}.item:last-child{border:0}.item b{display:block;font-size:14px}.item a{color:#9dc3ff}
+.item p{margin:7px 0;color:#9daccc;font-size:13px}.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.agent{background:#17243e;border:1px solid #2a3b5b;border-radius:12px;padding:12px;min-height:88px}.agent strong{display:block;font-size:13px}.agent small{display:block;color:#9babcd;margin-top:5px}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.code{white-space:pre-wrap;word-break:break-word;background:#0a1223;color:#d6e7ff;padding:14px;border:1px solid #2b4063;border-radius:12px;font-size:12px;line-height:1.55;max-height:400px;overflow:auto}
+.toast{padding:12px;border-radius:10px;background:#273b59;margin:10px 0;display:none}.toast.error{background:#522639}
+.empty{padding:20px;text-align:center;color:#869bc2;border:1px dashed #34476a;border-radius:12px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.agents{grid-template-columns:repeat(2,1fr)}.shell{padding:15px}.panel{padding:16px}}
+</style></head><body>
+<header><div class="shell"><div class="brand"><span class="logo">◆</span><span>GameDev <span style="color:#92a9ff">AI Studio</span><br><small class="muted">Control Center · v0.1</small></span></div><span id="connection" class="status">Conectando...</span></div></header>
+<main class="shell"><h1>Seu estúdio de jogos com IA</h1><p class="lead">Organize projetos, distribua tarefas entre especialistas e revise o resultado antes de publicar.</p>
+<div id="notice" class="toast" role="status"></div>
+<div class="panel inline"><div><b>Configuração do acesso</b><p class="muted" style="font-size:12px;margin:6px 0">Token do servidor (não é a chave da API OpenAI).</p></div><div style="display:flex;gap:8px;align-items:center"><input aria-label="Token de acesso" type="password" id="token" placeholder="STUDIO_TOKEN" style="width:170px"><button class="secondary" id="saveToken">Conectar</button></div></div>
+<div class="grid">
+<section><div class="panel"><div class="inline"><h2>Projetos</h2><span class="badge" id="projectCount">0</span></div><div id="projects"></div>
+<form id="projectForm" class="form"><label>Nome do projeto<input name="name" required minlength="2" placeholder="Ex.: Dungeons Fire"></label><label>Link do repositório GitHub<input name="repository" type="url" placeholder="https://github.com/usuario/jogo"></label><button type="submit">+ Adicionar projeto</button></form></div>
+<div class="panel"><h2>Nova tarefa</h2><form id="taskForm" class="form"><label>Projeto<select name="project_id" id="taskProject" required></select></label><label>O que precisa ser feito?<input name="title" required minlength="3" placeholder="Ex.: Melhorar animações de combate"></label><label>Instruções<textarea name="description" placeholder="Detalhes técnicos e critérios de qualidade"></textarea></label><button type="submit">Criar tarefa e selecionar especialista</button></form></div></section>
+<section><div class="panel"><div class="inline"><h2>Fila de trabalho</h2><span class="badge" id="taskCount">0</span></div><div id="tasks"></div></div>
+<div class="panel"><h2>Plano / resultado</h2><pre class="code" id="detail">Selecione Planejar para chamar a IA ou Ver detalhes para acompanhar a execução.</pre></div></section></div>
+<div class="panel"><h2>Equipe especializada</h2><div class="agents" id="agents"></div><p class="muted" style="font-size:12px;margin-bottom:0">Planejamento exige API configurada. Execução de código exige Codex CLI em um runner autorizado. Nada é publicado automaticamente.</p></div>
+</main>
+<script>
+(function(){
+"use strict";
+const el=id=>document.getElementById(id);
+let projects=[],tasks=[];
+el("token").value=sessionStorage.getItem("studio-token")||"";
+function notify(msg,error){const x=el("notice");x.textContent=msg;x.style.display="block";x.classList.toggle("error",!!error);}
+async function api(path,method,body){
+ const response=await fetch(path,{method:method||"GET",headers:{"Content-Type":"application/json","X-Studio-Token":el("token").value.trim()},body:body?JSON.stringify(body):undefined});
+ const raw=await response.json();
+ if(!response.ok)throw new Error(raw.error||"Erro HTTP "+response.status);
+ return raw;
+}
+function node(tag,content,className){const n=document.createElement(tag);if(content!==undefined)n.textContent=content;if(className)n.className=className;return n;}
+function empty(target,message){target.replaceChildren(node("div",message,"empty"));}
+function render(){
+ const ps=el("projects"),ts=el("tasks"),sel=el("taskProject");ps.replaceChildren();ts.replaceChildren();sel.replaceChildren();
+ el("projectCount").textContent=projects.length;el("taskCount").textContent=tasks.length;
+ if(!projects.length)empty(ps,"Cadastre seu primeiro jogo.");
+ for(const p of projects){
+ const item=node("div",undefined,"item");item.append(node("b",p.name));if(p.repository){const a=node("a","Abrir repositório");a.href=p.repository;a.target="_blank";a.rel="noopener noreferrer";item.append(a);}
+ item.append(node("p","Workspace: "+p.local_path));ps.append(item);
+ const opt=node("option",p.name);opt.value=p.id;sel.append(opt);
+ }
+ if(!tasks.length)empty(ts,"Nenhuma tarefa na fila.");
+ for(const t of tasks){
+ const item=node("div",undefined,"item");item.append(node("b",t.title));item.append(node("p",t.agent_id+" · "+t.status+" · "+(projects.find(p=>p.id===t.project_id)||{}).name));
+ const acts=node("div",undefined,"actions");
+ const detail=node("button","Ver detalhes","secondary");detail.type="button";detail.onclick=()=>{el("detail").textContent=t.plan||t.log||"Aguardando planejamento.";};acts.append(detail);
+ const plan=node("button","Planejar com IA","secondary");plan.type="button";plan.onclick=()=>execute(t.id,"plan");acts.append(plan);
+ const run=node("button","Executar com Codex");run.type="button";run.onclick=()=>{if(confirm("Executar o Codex no repositório local em uma branch isolada?"))execute(t.id,"run");};acts.append(run);
+ item.append(acts);ts.append(item);
+ }
+}
+async function refresh(){
+ try{const all=await Promise.all([api("/api/health"),api("/api/projects"),api("/api/tasks"),api("/api/agents")]);
+ projects=all[1];tasks=all[2];render();el("agents").replaceChildren();
+ for(const a of all[3]){const n=node("div",undefined,"agent");n.append(node("strong",a.name),node("small",a.focus));el("agents").append(n);}
+ el("connection").textContent=all[0].ai_ready?"IA configurada":"Painel conectado";
+ }catch(e){el("connection").textContent="Sem conexão";notify(e.message,true);}
+}
+async function execute(id,action){
+ el("detail").textContent="Processando "+action+"...";
+ try{const t=await api("/api/tasks/"+id+"/"+action,"POST",{});el("detail").textContent=t.plan||t.log||t.status;notify("Tarefa atualizada: "+t.status);await refresh();}
+ catch(e){el("detail").textContent=e.message;notify(e.message,true);}
+}
+el("saveToken").onclick=()=>{sessionStorage.setItem("studio-token",el("token").value.trim());refresh();};
+el("projectForm").onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries());try{await api("/api/projects","POST",data);e.target.reset();notify("Projeto adicionado");await refresh();}catch(err){notify(err.message,true);}};
+el("taskForm").onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries());try{await api("/api/tasks","POST",data);e.target.reset();notify("Tarefa registrada");await refresh();}catch(err){notify(err.message,true);}};
+refresh();
+})();
+</script></body></html>
