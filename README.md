@@ -1,6 +1,16 @@
-# GameDev AI Studio — v0.1.0
+# GameDev AI Studio — Android v0.2 + Servidor v0.1
 
 Painel mobile-first e backend Python para coordenar seis especialistas em desenvolvimento de jogos. **Este é um MVP real, não uma suíte autônoma completa.**
+
+## Aplicativo Android nativo (v0.2)
+
+A primeira interface móvel está em [android/](android/) e é um aplicativo **Android nativo**, não um atalho de site. Tem telas Início, Solicitar, Tarefas, Acompanhamento e Ajustes. Depois de salvar uma credencial GitHub criptografada no Android Keystore, o aplicativo cria Issues, acompanha o histórico e exibe respostas da automação sem abrir o GitHub a cada tarefa.
+
+Apenas a **configuração inicial** exige abrir o GitHub para criar um Fine-grained Personal Access Token limitado a este repositório, com acesso Issues Read/Write. O app não armazena a chave OpenAI. No repositório público, solicitações e comentários são públicos.
+
+O pipeline [Android APK](.github/workflows/android.yml) compila, testa, verifica lint e gera uma prévia APK no GitHub Releases após aprovação da branch principal. Consulte o [guia Android](android/README.md) para instalar, conectar e fazer seu primeiro teste.
+
+**Estado real:** a automação de Issues já classifica o especialista, mas só produz planejamento com IA se OPENAI_API_KEY/OPENAI_MODEL estiverem configurados; ainda não modifica automaticamente projetos Godot/Unity nem gera APK de jogos.
 
 ## O que funciona
 
