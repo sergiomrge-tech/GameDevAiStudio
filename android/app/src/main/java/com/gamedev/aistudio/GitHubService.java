@@ -38,6 +38,11 @@ final class GitHubService {
             "/comments?per_page=100",token,null));
     }
 
+    /** Check Issues read access before saving a token; write permission is checked on POST. */
+    static void verifyIssueRead(String token) throws Exception {
+        request("GET","/repos/"+REPO+"/issues?state=open&per_page=1",token,null);
+    }
+
     static JSONObject createTask(String token,String title,String body) throws Exception {
         JSONObject payload=new JSONObject();
         payload.put("title",title);
@@ -76,11 +81,14 @@ final class GitHubService {
                     String detail=new JSONObject(response).optString("message","");
                     if(!detail.isEmpty()) message+=": "+detail;
                 }catch(Exception ignored){}
-                if(status==401) message="Token expirado ou inválido. Abra Ajustes.";
-                if(status==403) message+=". Verifique permissões Issues (leitura e escrita) e o limite da API.";
-                throw new IllegalStateException(message);
+                throw new IllegalStateException(GitHubApiErrors.describe(status,
+                    message.startsWith("HTTP "+status+": ")?
+                        message.substring(("HTTP "+status+": ").length()):message,
+                    c.getHeaderField("X-RateLimit-Remaining")));
             }
             return response;
+        }catch(java.io.IOException io){
+            throw new IllegalStateException(GitHubApiErrors.network(io),io);
         }finally{c.disconnect();}
     }
 

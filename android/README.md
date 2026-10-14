@@ -1,4 +1,4 @@
-# Android client — GameDev AI Studio v0.2
+# Android client — GameDev AI Studio v0.2.1
 
 Este projeto **é um app Android nativo** (Java, Android SDK; sem WebView e sem dependências de UI externas).
 
@@ -34,6 +34,19 @@ O projeto deve permitir o acesso à criação de Issues. O workflow `.github/wor
 O workflow `.github/workflows/android.yml` roda testes JUnit, Android Lint e `assembleDebug` com Gradle 8.9, Java 17 e Android Gradle Plugin 8.7.3. A cada aprovação na branch main, publica a prévia no GitHub Releases.
 
 Este APK é **debug**: a assinatura é temporária e pode mudar a cada build. Para instalar uma nova prévia, pode ser necessário desinstalar a anterior. Faça backup dos dados relevantes antes; o token é removido ao desinstalar.
+
+## Diagnóstico de erro da API (v0.2.1)
+
+Se a conta GitHub foi conectada mas **Enviar ao estúdio** falha, a autenticação `GET /user` não prova que o token pode criar Issues. Confira no GitHub > Settings > Developer settings > Personal access tokens > Fine-grained tokens > token utilizado:
+
+- Resource owner: `sergiomrge-tech`.
+- Repository access: Only selected repositories > `GameDevAiStudio`.
+- Repository permissions > Issues > **Read and write** (Metadata read vem automaticamente).
+- Token não expirado e aprovado quando necessário.
+
+A tela de erro distingue HTTP 401, 403, 404, 422, limite de API e falhas de DNS/timeout. **Copiar diagnóstico** copia somente a mensagem de erro, nunca o token. A validação do token passou a verificar também leitura de Issues, mas a escrita ainda é validada no envio. O preenchimento da solicitação é preservado enquanto o app estiver aberto, caso precise visitar Ajustes.
+
+Se já instalou a v0.2, lembre que a assinatura de debug gerada por CI é temporária: a v0.2.1 pode exigir desinstalação da v0.2 antes de instalar. Isso apaga o token salvo no Keystore, que precisará ser configurado novamente.
 
 ## Limitações explícitas
 

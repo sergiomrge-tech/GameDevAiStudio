@@ -45,6 +45,7 @@ public final class MainActivity extends Activity {
     private JSONArray commentCache=new JSONArray();
     private JSONObject detailIssue;
     private boolean loadingTasks=false,loadingComments=false, submitting=false;
+    private final String[] draft=new String[5];
     private final ExecutorService executor=Executors.newSingleThreadExecutor();
 
     @Override public void onCreate(Bundle savedInstanceState){
@@ -327,11 +328,14 @@ public final class MainActivity extends Activity {
         EditText title=field(form,"TÍTULO DA TAREFA","Ex.: Corrigir animação de corrida",false);
         EditText description=field(form,"O QUE DEVE SER FEITO?","Explique o problema, o que quer mudar e os detalhes importantes...",true);
         EditText acceptance=field(form,"CRITÉRIOS DE APROVAÇÃO","Ex.: sem erros, animação natural e boa performance",true);
+        EditText[] editors={project,engine,title,description,acceptance};
+        for(int i=0;i<editors.length;i++) if(draft[i]!=null)editors[i].setText(draft[i]);
         Button send=button(submitting?"Enviando...":"Enviar ao estúdio   →",true);
         fullButton(form,send);
         send.setEnabled(!submitting);
         send.setOnClickListener(v->{
             if(submitting)return;
+            for(int i=0;i<editors.length;i++)draft[i]=editors[i].getText().toString();
             final String issueTitle,issueBody;
             try{
                 issueTitle=TaskFormatter.title(title.getText().toString());
@@ -362,6 +366,7 @@ public final class MainActivity extends Activity {
                 JSONObject created=GitHubService.createTask(token,title,bodyText);
                 runOnUiThread(()->{
                     submitting=false;
+                    java.util.Arrays.fill(draft,null);
                     detailIssue=created;
                     commentCache=new JSONArray();
                     showNotice("Solicitação publicada com sucesso!");
@@ -535,7 +540,7 @@ public final class MainActivity extends Activity {
 
         add(account,text("1  Criar um token com acesso restrito",14,WHITE,true));
         gap(account,7);
-        add(account,text("No GitHub, escolha Fine-grained token. Selecione somente o repositório GameDevAiStudio e conceda Issues: Read and Write. Evite tokens com acesso a todos os repositórios.",12,MUTED,false));
+        add(account,text("No GitHub, escolha Fine-grained token. Selecione somente o repositório GameDevAiStudio e conceda Repository permissions > Issues: Read and write. Token com acesso somente a Metadata não pode criar tarefas.",12,MUTED,false));
         Button getToken=button("Abrir criação de token no GitHub  ↗",false);
         fullButton(account,getToken);
         getToken.setOnClickListener(v->openLink("https://github.com/settings/personal-access-tokens/new"));
@@ -569,6 +574,7 @@ public final class MainActivity extends Activity {
                     if(!GitHubService.OWNER.equalsIgnoreCase(login))
                         throw new IllegalStateException("O token pertence a @"+login+
                             ". Conecte a conta @"+GitHubService.OWNER+", proprietária do repositório.");
+                    GitHubService.verifyIssueRead(candidate);
                     SecureTokenStore.save(this,candidate);
                     runOnUiThread(()->{
                         showNotice("Conta GitHub conectada.");
@@ -605,14 +611,23 @@ public final class MainActivity extends Activity {
         gap(note,8);
         add(note,text("Depois, tudo acontece no GameDev AI Studio: solicitar, acompanhar e consultar respostas. A automação dos agentes usa GitHub Actions; IA generativa exige uma configuração adicional no repositório.",12,MUTED,false));
         gap(note,10);
-        add(note,text("Versão de testes 0.2.0 • APK de depuração • Sem coleta de dados analíticos.",11,GOLD,false));
+        add(note,text("Versão de testes 0.2.1 • Diagnóstico de API e permissões • Sem coleta de dados analíticos.",11,GOLD,false));
     }
     private void openLink(String url){
         startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));
     }
     private void showError(String message){
-        new AlertDialog.Builder(this).setTitle("Não foi possível concluir")
-            .setMessage(message==null?"Erro inesperado.":message)
+        final String detail=message==null?"Erro inesperado.":message;
+        new AlertDialog.Builder(this).setTitle("Diagnóstico de conexão / API")
+            .setMessage(detail)
+            .setNeutralButton("Copiar diagnóstico",(dialog,which)->{
+                android.content.ClipboardManager clip=
+                    (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                if(clip!=null){
+                    clip.setPrimaryClip(android.content.ClipData.newPlainText("Erro GameDev AI Studio",detail));
+                    showNotice("Diagnóstico copiado. Não compartilhe seu token.");
+                }
+            })
             .setPositiveButton("OK",null).show();
     }
     private void showNotice(String value){
