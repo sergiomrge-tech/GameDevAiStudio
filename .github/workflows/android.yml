@@ -1,0 +1,47 @@
+name: Android APK
+on:
+  push:
+    branches: [main, feature/android-client-v0.2]
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check Android SDK availability
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME/platforms"
+          ls "$ANDROID_HOME/platforms"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compile, test and lint
+        run: gradle -p android --no-daemon --stacktrace testDebugUnitTest lintDebug assembleDebug
+      - name: Verify APK
+        run: test -s android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamedev-ai-studio-android
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish downloadable preview
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk gamedev-ai-studio-v0.2-preview.apk
+          if gh release view v0.2.0-preview > /dev/null 2>&1; then
+            gh release upload v0.2.0-preview gamedev-ai-studio-v0.2-preview.apk --clobber
+          else
+            gh release create v0.2.0-preview gamedev-ai-studio-v0.2-preview.apk --target "$GITHUB_SHA" --title "GameDev AI Studio Android v0.2 - Previa" --notes "APK de testes assinado com chave debug temporaria. Integração Android/GitHub Issues. Nao executa jogos autonomamente." --prerelease
+          fi
